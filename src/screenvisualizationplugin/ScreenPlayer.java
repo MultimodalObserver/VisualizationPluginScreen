@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -17,8 +18,11 @@ public class ScreenPlayer implements Playable{
     private long start;
     private long end;
     private boolean isPlaying=false;
+    private boolean isSync=false;
     private static Panel wcpanel;
     private String path;
+    private ArrayList<Long> frames = new ArrayList<Long>();
+    private int cont=0;
     
 
     private static final Logger logger = Logger.getLogger(ScreenPlayer.class.getName());
@@ -27,8 +31,10 @@ public class ScreenPlayer implements Playable{
             wcpanel = new Panel(file);
             path = file.getAbsolutePath();
             String path2 =  path.substring(0,path.lastIndexOf(".")) + "-temp.txt";
+            String path3 =  path.substring(0,path.lastIndexOf(".")) + "-frames.txt";
             String cadena;
             FileReader f;
+            FileReader f2;
             try {
                 f = new FileReader(path2);
                 BufferedReader b = new BufferedReader(f);
@@ -44,7 +50,21 @@ public class ScreenPlayer implements Playable{
                 }
             } catch (FileNotFoundException ex) {
                 logger.log(Level.SEVERE, null, ex);
-            }           
+            }
+            try {
+                f2 = new FileReader(path3);
+                BufferedReader b = new BufferedReader(f2);
+                try {
+                    while((cadena=b.readLine())!=null){
+                        frames.add(Long.parseLong(cadena));
+                    }
+                    b.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
+            } catch (FileNotFoundException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
             try {
                 Thread.sleep(50);
             } catch (InterruptedException ex) {
@@ -74,6 +94,13 @@ public class ScreenPlayer implements Playable{
         if(desiredMillis>=start && desiredMillis<=end){            
             wcpanel.current(desiredMillis-start);
         }
+        else if(desiredMillis<start){
+            wcpanel.current(0);
+        }
+        cont=0;
+        while(frames.get(cont)<desiredMillis){
+            cont++;
+        }
     }
     
     @Override
@@ -88,19 +115,45 @@ public class ScreenPlayer implements Playable{
 
     @Override
     public void play(long millis) {
-        if(millis>=start && millis <=end){
-            if(!isPlaying){            
-               wcpanel.play();
-               isPlaying=true;
-           }   
-        }        
+        if(isSync){
+            if(frames.size()>(cont+1)){
+                if(frames.get(cont)==millis){
+                    isPlaying=true;
+                    wcpanel.play(frames.get(cont+1)-start);
+                }
+                cont++;
+            }
+            else{
+                wcpanel.play2(millis-start);
+            }
+        }
+        else{
+            wcpanel.play(millis);
+        }
+        /*
+        if(millis>=start && millis <end){
+            wcpanel.play(millis-start);
+            isPlaying=true;             
+        }
+        if(millis>=end){
+            wcpanel.stop();
+            isPlaying=false;
+        }*/
     }
 
     @Override
     public void stop() {
-        if(isPlaying){            
+        if(isPlaying){
+            cont=0;
             wcpanel.stop();
             isPlaying=false;
         }
     }    
+
+    @Override
+    public void sync(boolean bln) {
+        wcpanel.sync(bln);
+        isSync=bln;
+    }
+
 }
