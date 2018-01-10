@@ -83,38 +83,15 @@ public class Panel extends JPanel{
         return this;
     }
     
-     public void play(long millis){
-        if(millis<end){
-            mediaPlayer.play();
-            isPlaying=true;         
-             /*if(!isPlaying){
-                velocidad=1;
-                mediaPlayer.setRate(velocidad);
-                mediaPlayer.play();
-                isPlaying=true;
-            }
-             if(isSync){
-                if(millis%150==0){            
-                    deltaT = mediaPlayer.getCurrentTime().toMillis()-millis;
-                    if((int)deltaT>0){
-                        if(velocidad>=0.1){
-                            velocidad = velocidad-0.05;
-                            mediaPlayer.setRate(velocidad);                    
-                        }
-                    }else if((int)deltaT<0){
-                        if(velocidad<=1.1){
-                            velocidad = velocidad+0.05;       
-                            mediaPlayer.setRate(velocidad);             
-                        }
-                    } 
-                } 
-             }*/    
-        }        
+     public void play(){
+        mediaPlayer.play();
+        isPlaying=true;      
     }
-     
-     public void play2(long millis){
-        if(mediaPlayer.getCurrentTime().toMillis()>millis){
+    
+    public void play2(long frame){
+        if(mediaPlayer.getCurrentTime().toMillis()>=frame && isPlaying){
             mediaPlayer.pause();
+            isPlaying=false;
         }
     }
     public void stop(){

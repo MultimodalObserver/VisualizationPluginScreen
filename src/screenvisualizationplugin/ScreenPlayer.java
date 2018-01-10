@@ -115,30 +115,25 @@ public class ScreenPlayer implements Playable{
 
     @Override
     public void play(long millis) {
-        if(isSync){
-            if(frames.size()>(cont+1)){
-                if(frames.get(cont)==millis){
-                    isPlaying=true;
-                    wcpanel.play(frames.get(cont+1)-start);
+        if(millis>=start && millis<=end){   
+            if(isSync){
+                if(frames.size()>cont){
+                    if(frames.get(cont)==millis){
+                        isPlaying=true;
+                        wcpanel.play();
+                        cont++;
+                    }
+                    else if(frames.get(cont)>millis && isPlaying){
+                        wcpanel.play2(frames.get(cont)-start);
+                        isPlaying=false;
+                    }
                 }
-                cont++;
             }
             else{
-                wcpanel.play2(millis-start);
+                isPlaying=true;
+                wcpanel.play();
             }
         }
-        else{
-            wcpanel.play(millis);
-        }
-        /*
-        if(millis>=start && millis <end){
-            wcpanel.play(millis-start);
-            isPlaying=true;             
-        }
-        if(millis>=end){
-            wcpanel.stop();
-            isPlaying=false;
-        }*/
     }
 
     @Override
