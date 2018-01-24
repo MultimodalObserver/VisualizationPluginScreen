@@ -17,6 +17,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 import javax.swing.JPanel;
@@ -25,7 +26,7 @@ import javax.swing.JPanel;
  *
  * @author Khrikhri
  */
-public class Panel extends JPanel{
+public class Panel extends JFXPanel{
     
     private File MEDIA_URL;
     private Media media;
@@ -38,8 +39,11 @@ public class Panel extends JPanel{
     long seekSlider=0;
     int cambio = 0;
     double deltaT;
-     
-    private void initFxLater(JFXPanel panel){
+         
+    public Panel(File file){
+        
+        MEDIA_URL = file;
+        setLayout(new BorderLayout());
         Group root = new Group();
          
         try {
@@ -55,9 +59,9 @@ public class Panel extends JPanel{
                 end=(long)media.getDuration().toMillis();
             }
         });
-        //mediaPlayer.setRate(0.9);
                // create mediaView and add media player to the viewer
-        mediaView = new MediaView(mediaPlayer);
+        mediaView = new MediaView();
+        mediaView.setMediaPlayer(mediaPlayer);
                 DoubleProperty width = mediaView.fitWidthProperty();
                 DoubleProperty height = mediaView.fitHeightProperty();
                 width.bind(Bindings.selectDouble(mediaView.sceneProperty(),"width"));
@@ -65,21 +69,10 @@ public class Panel extends JPanel{
         Scene scene = new Scene(root, mediaView.getFitWidth(), mediaView.getFitHeight());
         ((Group)scene.getRoot()).getChildren().add(mediaView);
          
-        panel.setScene(scene);
-    }
-    
-    
-    public Panel(File file){
-        
-        MEDIA_URL = file;
-        final JFXPanel jFXPanel = new JFXPanel();
-        this.setLayout(new BorderLayout());
-        initFxLater(jFXPanel);
-        this.setSize(640,480);         
-        add(jFXPanel);
+        setScene(scene);
     }
  
-    public JPanel getPanel() {
+    public JFXPanel getPanel() {
         return this;
     }
     
@@ -115,5 +108,8 @@ public class Panel extends JPanel{
                     mediaPlayer.seek(Duration.millis(sw)); 
             }
         }).start();
-    } 
+    }
+    public Status getStatus(){
+       return mediaPlayer.getStatus();
+    }
 }

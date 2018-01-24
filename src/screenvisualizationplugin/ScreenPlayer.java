@@ -1,4 +1,4 @@
-package screenvisualizationplugin;
+    package screenvisualizationplugin;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javafx.scene.media.MediaPlayer.Status.STOPPED;
 import javax.swing.SwingUtilities;
 import mo.core.ui.dockables.DockableElement;
 import mo.core.ui.dockables.DockablesRegistry;
@@ -119,9 +120,16 @@ public class ScreenPlayer implements Playable{
             if(isSync){
                 if(frames.size()>cont){
                     if(frames.get(cont)==millis){
-                        isPlaying=true;
-                        wcpanel.play();
-                        cont++;
+                        if(cont != 0 && wcpanel.getStatus()!=STOPPED){
+                            isPlaying=true;
+                            wcpanel.play();
+                            cont++; 
+                        }
+                        if(cont==0){
+                            isPlaying=true;
+                            wcpanel.play();
+                            cont++;                            
+                        }
                     }
                     else if(frames.get(cont)>millis && isPlaying){
                         wcpanel.play2(frames.get(cont)-start);
@@ -130,9 +138,14 @@ public class ScreenPlayer implements Playable{
                 }
             }
             else{
-                isPlaying=true;
-                wcpanel.play();
+                if(!isPlaying){                    
+                    isPlaying=true;
+                    wcpanel.play();
+                }
             }
+        }
+        else{
+            wcpanel.stop();
         }
     }
 
