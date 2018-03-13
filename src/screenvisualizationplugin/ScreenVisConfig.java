@@ -64,7 +64,7 @@ public class ScreenVisConfig implements VisualizableConfiguration {
     
     private void ensurePlayerCreated() {
         if (player == null && !files.isEmpty()) {
-            player = new ScreenPlayer(files.get(0));
+            player = new ScreenPlayer(files.get(0),id);
         }
     }
 

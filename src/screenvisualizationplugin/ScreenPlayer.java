@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javafx.scene.media.MediaPlayer.Status.STOPPED;
-import javax.swing.SwingUtilities;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import mo.core.ui.dockables.DockableElement;
 import mo.core.ui.dockables.DockablesRegistry;
 import mo.visualization.Playable;
@@ -24,12 +24,16 @@ public class ScreenPlayer implements Playable{
     private String path;
     private ArrayList<Long> frames = new ArrayList<Long>();
     private int cont=0;
+    private String id;
+    
+    private MediaPlayer mediaPlayer;
     
 
     private static final Logger logger = Logger.getLogger(ScreenPlayer.class.getName());
 
-    public ScreenPlayer(File file) {
+    public ScreenPlayer(File file, String id) {
             wcpanel = new Panel(file);
+            mediaPlayer = wcpanel.getMP();
             path = file.getAbsolutePath();
             String path2 =  path.substring(0,path.lastIndexOf(".")) + "-temp.txt";
             String path3 =  path.substring(0,path.lastIndexOf(".")) + "-frames.txt";
@@ -72,31 +76,39 @@ public class ScreenPlayer implements Playable{
                 logger.log(Level.SEVERE, null, ex);
             }
             
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    DockableElement e = new DockableElement();
+                    DockableElement e = new DockableElement(id);
                     e.add(wcpanel);
                     DockablesRegistry.getInstance().addAppWideDockable(e);
-                }
-            });            
+                
     }
     
     @Override
     public void pause() {
-        if(isPlaying){            
-            wcpanel.pause();
+        if(isPlaying){
+            mediaPlayer.pause();    
             isPlaying=false;
         }
     }
 
     @Override
     public void seek(long desiredMillis) {
-        if(desiredMillis>=start && desiredMillis<=end){            
-            wcpanel.current(desiredMillis-start);
+        if(desiredMillis>=start && desiredMillis<=end){      
+            new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                    mediaPlayer.seek(Duration.millis(desiredMillis-start));  
+            }
+        }).start();
         }
         else if(desiredMillis<start){
-            wcpanel.current(0);
+            new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                    mediaPlayer.seek(Duration.millis(0));  
+            }
+        }).start();
         }
         cont=0;
         while(frames.get(cont)<desiredMillis){
@@ -116,23 +128,23 @@ public class ScreenPlayer implements Playable{
 
     @Override
     public void play(long millis) {
-        if(millis>=start && millis<=end){   
+        if(millis>=start && millis<=end){
             if(isSync){
                 if(frames.size()>cont){
                     if(frames.get(cont)==millis){
-                        if(cont != 0 && wcpanel.getStatus()!=STOPPED){
+                        if(cont != 0){
                             isPlaying=true;
-                            wcpanel.play();
+                            mediaPlayer.play();
                             cont++; 
                         }
                         if(cont==0){
                             isPlaying=true;
-                            wcpanel.play();
+                            mediaPlayer.play();
                             cont++;                            
                         }
                     }
                     else if(frames.get(cont)>millis && isPlaying){
-                        wcpanel.play2(frames.get(cont)-start);
+                        mediaPlayer.pause();
                         isPlaying=false;
                     }
                 }
@@ -140,27 +152,26 @@ public class ScreenPlayer implements Playable{
             else{
                 if(!isPlaying){                    
                     isPlaying=true;
-                    wcpanel.play();
+                    mediaPlayer.play();
                 }
             }
         }
-        else{
-            wcpanel.stop();
+        else{    
+            mediaPlayer.stop();
         }
     }
 
     @Override
     public void stop() {
         if(isPlaying){
-            cont=0;
-            wcpanel.stop();
+            cont=0; 
+            mediaPlayer.stop();
             isPlaying=false;
         }
     }    
 
     @Override
     public void sync(boolean bln) {
-        wcpanel.sync(bln);
         isSync=bln;
     }
 

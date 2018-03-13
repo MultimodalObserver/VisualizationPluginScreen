@@ -17,16 +17,14 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
-import javafx.util.Duration;
 import javax.swing.JPanel;
 
 /**
  *
  * @author Khrikhri
  */
-public class Panel extends JFXPanel{
+public class Panel extends JPanel{
     
     private File MEDIA_URL;
     private Media media;
@@ -39,8 +37,18 @@ public class Panel extends JFXPanel{
     long seekSlider=0;
     int cambio = 0;
     double deltaT;
-         
+    
     public Panel(File file){
+        pane p = new pane(file);
+        setLayout(new BorderLayout());
+        p.setSize(getSize());
+        p.setVisible(true);
+        this.add(p);
+    }
+    
+    public class pane extends JFXPanel{
+        
+        public pane(File file){
         
         MEDIA_URL = file;
         setLayout(new BorderLayout());
@@ -70,46 +78,14 @@ public class Panel extends JFXPanel{
         ((Group)scene.getRoot()).getChildren().add(mediaView);
          
         setScene(scene);
+        }
     }
  
-    public JFXPanel getPanel() {
+    public JPanel getPanel() {
         return this;
     }
     
-     public void play(){
-        mediaPlayer.play();
-        isPlaying=true;      
-    }
-    
-    public void play2(long frame){
-        if(mediaPlayer.getCurrentTime().toMillis()>=frame && isPlaying){
-            mediaPlayer.pause();
-            isPlaying=false;
-        }
-    }
-    public void stop(){
-        mediaPlayer.stop();
-        isPlaying=false;
-    }
-    public void pause(){
-        mediaPlayer.pause();
-        isPlaying=false;
-    }
-    
-    public void sync(boolean sync){
-        isSync=sync;
-    }
-    
-    public void current(long sw){
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                    mediaPlayer.seek(Duration.millis(sw)); 
-            }
-        }).start();
-    }
-    public Status getStatus(){
-       return mediaPlayer.getStatus();
+    public MediaPlayer getMP(){
+        return mediaPlayer;
     }
 }
