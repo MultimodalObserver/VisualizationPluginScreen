@@ -72,6 +72,7 @@ public class ScreenVisConfig implements VisualizableConfiguration {
     public void addFile(File file) {
         if ( !files.contains(file) ) {
             this.files.add(file);
+            player = new ScreenPlayer(files.get(files.size()-1),id);
         }
     }
 

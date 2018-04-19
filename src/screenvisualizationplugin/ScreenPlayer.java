@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import mo.core.ui.dockables.DockableElement;
@@ -22,7 +23,7 @@ public class ScreenPlayer implements Playable{
     private boolean isSync=false;
     private static Panel wcpanel;
     private String path;
-    private ArrayList<Long> frames = new ArrayList<Long>();
+    //private ArrayList<Long> frames = new ArrayList<Long>();
     private int cont=0;
     private String id;
     
@@ -34,9 +35,10 @@ public class ScreenPlayer implements Playable{
     public ScreenPlayer(File file, String id) {
             wcpanel = new Panel(file);
             mediaPlayer = wcpanel.getMP();
+            Platform.setImplicitExit(false);
             path = file.getAbsolutePath();
             String path2 =  path.substring(0,path.lastIndexOf(".")) + "-temp.txt";
-            String path3 =  path.substring(0,path.lastIndexOf(".")) + "-frames.txt";
+            //String path3 =  path.substring(0,path.lastIndexOf(".")) + "-frames.txt";
             String cadena;
             FileReader f;
             FileReader f2;
@@ -56,7 +58,7 @@ public class ScreenPlayer implements Playable{
             } catch (FileNotFoundException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
-            try {
+            /*try {
                 f2 = new FileReader(path3);
                 BufferedReader b = new BufferedReader(f2);
                 try {
@@ -69,14 +71,15 @@ public class ScreenPlayer implements Playable{
                 }
             } catch (FileNotFoundException ex) {
                 logger.log(Level.SEVERE, null, ex);
-            }
+            }*/
             try {
                 Thread.sleep(50);
             } catch (InterruptedException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
             
-                    DockableElement e = new DockableElement(id);
+                    DockableElement e = new DockableElement();
+                    e.setTitleText(id);
                     e.add(wcpanel);
                     DockablesRegistry.getInstance().addAppWideDockable(e);
                 
@@ -110,10 +113,10 @@ public class ScreenPlayer implements Playable{
             }
         }).start();
         }
-        cont=0;
+        /*cont=0;
         while(frames.get(cont)<desiredMillis){
             cont++;
-        }
+        }*/
     }
     
     @Override
@@ -130,7 +133,7 @@ public class ScreenPlayer implements Playable{
     public void play(long millis) {
         if(millis>=start && millis<=end){
             if(isSync){
-                if(frames.size()>cont){
+                /*if(frames.size()>cont){
                     if(frames.get(cont)==millis){
                         if(cont != 0){
                             isPlaying=true;
@@ -146,6 +149,20 @@ public class ScreenPlayer implements Playable{
                     else if(frames.get(cont)>millis && isPlaying){
                         mediaPlayer.pause();
                         isPlaying=false;
+                    }
+                }*/
+                if((millis-start)%90==0){
+                    if((millis-start)<mediaPlayer.getCurrentTime().toMillis()){
+                        if(isPlaying){                            
+                            mediaPlayer.pause();
+                            isPlaying=false;
+                        }
+                    }
+                    else{
+                        if(!isPlaying){
+                            mediaPlayer.play();
+                            isPlaying=true;
+                        }
                     }
                 }
             }
