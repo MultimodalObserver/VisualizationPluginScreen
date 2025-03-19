@@ -24,6 +24,11 @@ public class ScreenVisConfig implements VisualizableConfiguration {
         files = new ArrayList<>();
     }
     
+    public ScreenVisConfig(String id) {
+        this(); 
+        this.id = id;
+    }
+    
    @Override
     public String getId() {
         return id;
